@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [[ $(git config user.email) = $(git show -s --format='%ae' HEAD) ]]; then
+  git commit --amend --reset-author
+else
+  git commit --amend
+fi

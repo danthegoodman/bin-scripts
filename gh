@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+REMOTE_URL="$(git remote get-url origin 2>&1)"
+[[ $? -ne 0 ]] && {
+  echo "$REMOTE_URL"
+  exit 1
+}
+
+GITHUB_MATCHER="git@github.com:(.+).git"
+[[ "$REMOTE_URL" =~ GITHUB_MATCHER ]]
+echo "$REMOTE_URL"

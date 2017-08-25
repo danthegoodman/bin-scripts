@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+FILE=$1
+FILTER='
+  def select_veracitydoc:
+    select(.href//""|(contains("localhost") or contains("local.vix"))|not)
+  ;
+
+  def select_prod_tenant:
+    select(.metadata.auth.tenant| length == 5)
+  ;
+
+  def format_auth_id:
+    if .vix then "\(.vix)|\(.sub)" else .sub end
+  ;
+
+  def reformat:
+    {
+      stack: "\(.metadata.error.message)\n\(.metadata.error.stack)",
+      auth: (.metadata.auth | format_auth_id),
+      tnt: .metadata.auth.tenant,
+      href,
+      msg: .message,
+      devMsg: .devMessage,
+      ts: .timestamp
+    }
+  ;
+
+  def format_stack:
+    . | strings | split("\n")
+  ;
+
+  def format_when:
+    map(.ts) | sort | {
+      first: .[0],
+      last: .[-1]
+    }
+  ;
+
+  def format_groups:
+    {
+      msg: .[0].msg,
+      stack: .[0].stack | format_stack,
+      devMsg: .[0].devMsg,
+      count: length,
+      when: format_when,
+      whoWhere: (map({href,auth,tnt}) | unique)
+    } | del(.[]|nulls)
+  ;
+
+  map(
+    select_veracitydoc
+    | select_prod_tenant
+    | reformat
+  )
+  | group_by([.stack, .msg, .devMsg])
+  | map(format_groups)
+  | sort_by(- .count)
+  | .[]
+'
+
+cat "$FILE" \
+| gsed -ze '1s;^;\o36;' -e 's;\o12;\o12\o36;g' \
+| gsed \$d \
+| jq --seq -s "$FILTER"

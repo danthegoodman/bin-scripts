@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export AWS_PROFILE=idsprod
+export NAME=$1
+lambda IscUniversalDeviceRouter "$(jq -n '{Records:[{s3:{bucket:{name:"integrityemr-universal-isc-device-import"},object:{key:env.NAME}}}]}')"

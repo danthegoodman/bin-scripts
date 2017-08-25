@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Uploads the current repo to Gitlab
+#
+# Requirements:
+#  `jq`
+#  `http` - the HTTPie program
+#  `~/.vix/gitlab_token` must have the text of an access token.
+
+die() {
+  echo "$@";
+  exit 1;
+}
+
+VERACITY_ID=962821
+PROJ_NAME="$1"
+[[ -z $1 ]] && die "Usage: $0 <repo-name>"
+
+REMOTES="$(git remote 2>&1)"
+[[ $? -eq 0 ]] || die "Error: Not a git repository"
+[[ -z "$REMOTES" ]] || die "Error: Repo already has remotes"
+
+echo "Creating project... (this may take a minute or two)"
+RESP=$(http --check-status --follow --print=b --timeout 120 \
+  POST "https://gitlab.com/api/v3/projects" \
+  "PRIVATE-TOKEN:$(cat ~/.vix/gitlab_token)" \
+  "name=$PROJ_NAME" \
+  "visibility_level=0" \
+  "public_builds:=false")
+[[ $? -eq 0 ]] || {
+  echo "$RESP" | jq '.'
+  die "Error: Unable to create repository"
+}
+
+WEB_URL="$(echo "$RESP" | jq -r '.web_url')"
+SSH_URL="$(echo "$RESP" | jq -r '.ssh_url_to_repo')"
+echo "Created project: ${WEB_URL}"
+
+echo
+git remote add origin "${SSH_URL}"
+git push -u origin master
+echo
+echo "Pushed master to origin (${SSH_URL})"

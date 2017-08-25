@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export AWS_PROFILE=idsprod
+
+aws s3 ls --recursive s3://integrityemr-universal-isc-device-import/TNXA/ | sort | tail -n 40

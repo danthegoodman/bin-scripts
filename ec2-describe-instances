@@ -1,0 +1,5 @@
+#!/bin/bash
+
+aws ec2 describe-instances |\
+  jq -r '.Reservations[].Instances[] | [(.Tags | from_entries | .Name), .InstanceId, .State.Name] | @tsv' |\
+  column -t -s $'\t'
