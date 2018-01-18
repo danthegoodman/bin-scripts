@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+FILTER='
+
+index(" ") as $ndx
+| .[0:$ndx] as $ts
+| (
+  .[$ndx+1:]
+  | fromjson
+  | .timestamp = $ts
+  )
+'
+
+jq -c -R "$FILTER"

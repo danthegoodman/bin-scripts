@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-FILE=$1
 FILTER='
   def select_veracitydoc:
     select(.href//""|(contains("localhost") or contains("local.vix"))|not)
@@ -59,7 +58,4 @@ FILTER='
   | .[]
 '
 
-cat "$FILE" \
-| gsed -ze '1s;^;\o36;' -e 's;\o12;\o12\o36;g' \
-| gsed \$d \
-| jq --seq -s "$FILTER"
+jq -s "$FILTER"
