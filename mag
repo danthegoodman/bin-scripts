@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: mag [QUERY]..."
+  echo ""
+  echo "Multi-ag : Searches files for multiple patterns using ag"
+  exit 1
+fi
+
+QUERY='ag -l "'"$1"'"'
+FINAL="$1"
+shift
+
+while [[ $# -ne 0 ]]; do
+  QUERY="$QUERY"' | xargs ag -l "'"$1"'"'
+  FINAL="$FINAL|$1"
+  shift
+done
+
+QUERY="$QUERY"' | xargs ag --heading "'"$FINAL"'"'
+
+echo "$QUERY"
+echo "---"
+bash -c "$QUERY"
+
