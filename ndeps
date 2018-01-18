@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+FILTER='
+{
+  project: input_filename | split("/")[-2],
+  deps: ({} + .dependencies + .optionalDependencies)
+    | to_entries
+    | sort_by(.key)
+    | map(.value = (
+      .value
+      | if startswith("^") then .[:(index("."))] else . end
+      ))
+    | from_entries
+}
+'
+
+FILTER='
+{
+  name,
+  deps: ({} + .dependencies + .optionalDependencies)
+}
+'
+
+jq "$FILTER" node_modules/**/package.json
