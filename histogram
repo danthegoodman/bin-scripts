@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+"use strict";
+var readline = require('readline');
+
+const scale = Number.parseInt(process.argv[2] || '1', 10) || 1;
+const sections = [];
+var rl = readline.createInterface({input: process.stdin,output: process.stdout,terminal: false});
+rl.on('line', consumeLine).on('close',buildReport);
+
+function consumeLine(line){
+  const n = Math.floor(Number.parseFloat(line));
+  const block = Math.floor(Math.log10(n)*scale);
+  sections[block] = 1 + (sections[block] || 0)
+}
+
+function buildReport(){
+  const total = sections.reduce((a,b)=>a+b, 0)
+
+  for(let i = 0; i<sections.length; i++){
+    const v = sections[i] || 0;
+
+    const name = !i ? '0.00' : Math.pow(10, i/scale).toFixed(2);
+    const pct = (100*v/total).toFixed(2);
+    const value = v.toString(10);
+
+    console.log(name.padStart(8), value.padStart(8), pct.padStart(6)+'%');
+  }
+}

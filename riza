@@ -1,0 +1,2 @@
+#!/bin/bash
+exec node /Users/danny/vix/personal/riza-cli/dist/boot.js "$@"
