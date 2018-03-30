@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+"use strict";
+var readline = require('readline');
+
+const steps = Number.parseInt(process.argv[2] || '5', 10) || 1;
+const values = [];
+const sections = [];
+var rl = readline.createInterface({input: process.stdin,output: process.stdout,terminal: false});
+rl.on('line', consumeLine).on('close',buildReport);
+
+function consumeLine(line){
+  if(!line) return;
+  const date = new Date(line);
+  values.push(date.toISOString());
+  // const n = Math.floor(Number.parseFloat(line));
+  // const block = Math.floor(Math.log10(n)*scale);
+  // sections[block] = 1 + (sections[block] || 0)
+}
+
+function buildReport(){
+  values.sort();
+  let minTime = new Date(values[0]).getTime();
+  let max = new Date(values[values.length - 1]);
+  let maxTime = max.getTime();
+  const stepSize = Math.floor(((maxTime - minTime) / steps));
+
+  for(let i = 0; i < steps; i++){
+    let startTime = minTime + (stepSize*i);
+    let start = new Date(startTime).toISOString();
+    let end = new Date(startTime + stepSize).toISOString();
+    let count = 0;
+    for(let it of values) {
+      if(start <= it && it < end){
+        count ++;
+      }
+    }
+    console.log(`${fmtDate(start)} ${count.toString().padStart(6)}`);
+  }
+  console.log(`${fmtDate(max.toISOString())}`)
+  console.log(`Days: ${(maxTime - minTime)/1000/60/60/24}`)
+}
+
+function fmtDate(datestr){
+  return datestr.split('T').join(' ');
+}
