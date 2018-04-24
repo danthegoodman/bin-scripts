@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+lsof -Pi :5436 -sTCP:LISTEN -t  >/dev/null
+if [[ $? -ne 0 ]]; then
+  ARGS="$ARGS -L 5436:singularity.db.us-east-1.vix:5432"
+fi
+
+lsof -Pi :5437 -sTCP:LISTEN -t  >/dev/null
+if [[ $? -ne 0 ]]; then
+  ARGS="$ARGS -L 5437:logging.db.us-east-1.vix:5432"
+fi
+
+echo -e "\033]Ph440000\033\\";
+ssh $ARGS arx
+echo -e "\033]Ph000000\033\\"
