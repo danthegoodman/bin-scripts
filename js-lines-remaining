@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+cd ~/vix/
+ag -l --js --ignore 'isle_config.js' --ignore 'json/generated' | xargs wc -l | grep -v 'total' | jq -R -c '
+ ltrimstr(" ")|ltrimstr(" ")|ltrimstr(" ")|ltrimstr(" ")|ltrimstr(" ")|ltrimstr(" ")|ltrimstr(" ") |
+ split(" ") |
+ {
+    size: (.[0]|tonumber), 
+    file:(.[1]),
+    project:(.[1]|split("/")|.[0])
+ }
+' | jq -s -c -r 'group_by(.project) | map( 
+ {project: .[0].project, total: (map(.size)|  add) }
+ ) | sort_by(.total)
+ | .[]
+ | "\(.total|tostring | ("      "+.) | .[-6:] ) \(.project)"
+'
