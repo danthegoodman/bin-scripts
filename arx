@@ -6,13 +6,10 @@ if [[ $? -ne 0 ]]; then
   exit 1
 fi
 
-lsof -Pi :5436 -sTCP:LISTEN -t  2&>/dev/null >/dev/null
-if [[ $? -ne 0 ]]; then
+if [[ -z "$(lsof -Pi :5436 -sTCP:LISTEN -t)" ]]; then
   ARGS="$ARGS -L 5436:singularity.db.us-east-1.vix:5432"
 fi
-
-lsof -Pi :5437 -sTCP:LISTEN -t  2&>/dev/null >/dev/null
-if [[ $? -ne 0 ]]; then
+if [[ -z "$(lsof -Pi :5437 -sTCP:LISTEN -t)" ]]; then
   ARGS="$ARGS -L 5437:logging.db.us-east-1.vix:5432"
 fi
 
