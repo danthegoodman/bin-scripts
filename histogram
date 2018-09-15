@@ -23,6 +23,6 @@ function buildReport(){
     const pct = (100*v/total).toFixed(2);
     const value = v.toString(10);
 
-    console.log(name.padStart(8), value.padStart(8), pct.padStart(6)+'%');
+    console.log(name.padStart(9), value.padStart(10), pct.padStart(6)+'%');
   }
 }
