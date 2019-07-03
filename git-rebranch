@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+[[ -z "$1" ]] && {
+  >&2 echo '
+Usage: git rebranch <NAME>
+
+Requires the current branch to have an upstream branch.
+Moves the currently commited work to a new branch, and resets
+the current branch to its upstream location.'
+  exit 1
+}
+
+UPSTREAM="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
+[[ "$?" -eq 0 ]] || exit 1
+
+CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+
+git checkout -b "$1"
+git branch -d -f "$CURRENT"
+git branch --track "$CURRENT" "$UPSTREAM"
+
