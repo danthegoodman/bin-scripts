@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+x() { source "$HOME/prog/equis/equis.sh" "$@"; }
+
+x list --all | while read PROJ; do
+  [[ -d "$PROJ/.git" ]] || continue
+  cd "$PROJ"
+  BRANCH="$(git branch --show-current)"
+  [[ "$BRANCH" != "master" ]] && echo "$PROJ : $BRANCH";
+done
