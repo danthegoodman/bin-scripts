@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-aws iam list-users | jq -r '.Users[].UserName' | while read NAME; do
-  echo "---- $NAME ----"
-  aws iam list-access-keys --user-name "$NAME" | \
-    jq '[.AccessKeyMetadata[] | select((.CreateDate | fromdate) < (now-7776000))] | length'
-
-  echo
-done

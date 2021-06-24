@@ -1,2 +1,0 @@
-#!/bin/bash
-exec node /Users/danny/prog/dl-deploys/dist/index.js "$@"

@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-while [[ -n "$1" ]]; do
-  git log -1 --pretty=tformat:"%ci $1" -- "$1"
-  shift
-done

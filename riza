@@ -1,2 +1,2 @@
 #!/bin/bash
-exec node /Users/danny/prog/riza-cli/dist/boot.js "$@"
+exec node /Users/danny/prog/riza-cli/dist "$@"

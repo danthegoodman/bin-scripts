@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-git bundle create "$(basename "$PWD").git-bundle" --all
-aws s3 cp "$(basename "$PWD").git-bundle" s3://archive-vix-prod/project_graveyard/
-

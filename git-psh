@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+UPSTREAM="$(git rev-parse --abbrev-ref --symbolic-full-name @{u})"
+if [[ "$?" -eq 1 ]]; then
+  git push -u origin "$CURRENT"
+else
+  git push
+fi
+

@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-die(){ echo "$@"; exit 1; }
-
-[[ -d node_modules ]] || die "Missing node_modules"
-[[ -x node_modules/.bin/xo ]] || die "xo is not currently installed"
-
-export EDITOR=webstorm
-exec ./node_modules/.bin/xo "$@"

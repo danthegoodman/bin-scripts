@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-RESULTS="$(ag "$1" --color | fzf --ansi --multi --reverse)"
-
-while [[ -n "$RESULTS" ]]; do
-  RESULTS="$(echo "$RESULTS" | fzf --ansi --multi --reverse)"
-done
