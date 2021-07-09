@@ -1,9 +1,26 @@
 #!/usr/bin/env bash
 
-git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
-if [[ "$?" -eq 0 ]]; then
-  git push
-else
+isNewBranch() {
+  ! git rev-parse --abbrev-ref --symbolic-full-name @{u} &>/dev/null
+}
+if isNewBranch; then
   git push -u origin "$(git rev-parse --abbrev-ref HEAD)"
+  exit
+fi
+
+commitCounts=( $(git rev-list --left-right --count @{upstream}...@) )
+remoteCount="${commitCounts[0]}"
+localCount="${commitCounts[1]}"
+
+if [[ "$localCount" -eq 0 ]]; then
+  echo "There's nothing to push."
+  exit 1
+fi
+
+if [[ "$remoteCount" -ne 0 ]]; then
+  echo "Pushing with --force-with-lease"
+  git push --force-with-lease
+else
+  git push
 fi
 
