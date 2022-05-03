@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+"use strict";
+const { tmpdir } = require('os');
+const { spawn } = require('child_process');
+const { resolve } = require('path');
+const { mkdirSync, renameSync, rmSync } = require('fs');
+
+const IS_CHILD_FLAG = '--is-child';
+const args = process.argv.slice(2);
+if(args.length === 0){
+  console.log("fast-rm [path...]");
+  console.log("")
+  console.log("Moves the given paths into a temp-dir and removes them in the background")
+  process.exitCode = 1;
+} else if(args[0] === IS_CHILD_FLAG){
+  rmSync(args[1], {recursive: true, force:true});
+} else {
+  const newPath = resolve(tmpdir(), `fast-rm-${randomId()}`);
+  mkdirSync(newPath);
+  let shouldRemove = false;
+  for(const dir of args){
+    try {
+      renameSync(dir, resolve(newPath, randomId()));
+      shouldRemove = true;
+    } catch (err){
+      if(err.code === 'ENOENT'){
+        console.log(`No such file or directory: ${dir}`);
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  if(shouldRemove){
+    spawn(
+      process.execPath,
+      [__filename, IS_CHILD_FLAG, newPath],
+      {
+        cwd: tmpdir(),
+        stdio: 'ignore',
+        detached: true,
+      }
+    ).unref();
+    console.log(`Moved files to ${newPath} and began removing in background`);
+  } else {
+    console.log("Nothing to remove");
+    process.exitCode = 1;
+  }
+}
+
+function randomId(){
+  return Math.random().toString(36).slice(2);
+}
