@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-for b in $(git for-each-ref --format='%(if:equals=[gone])%(upstream:track)%(then)%(refname:short)%(end)' refs/heads); do
- git branch -d -f $b
-done
