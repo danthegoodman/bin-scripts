@@ -1,10 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
-cd ~/outschool/
-ag -l --js \
-  --ignore 'dist' \
-  --ignore 'db-migrations' \
-  --ignore 'jest.config.js' \
-  --ignore 'knexfile.js' \
-  | xargs wc -l \
-  | grep -v ' total$'
+cd "$OS_REPO_HOME"
+doFind(){
+  find "website/app" -type f -name '*.js' -o -name '*.jsx' \
+   | grep -v -e 'tests' -e '\.raw\.' \
+   | sort \
+   | xargs wc -l
+}
+
+output="$(doFind)"
+echo "$output"
+
