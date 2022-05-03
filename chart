@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
 # Takes a series of numbers, builds a 2D graph with gnu plot, then
 #	spits it out in the terminal using an iterm2 escape code.
@@ -6,35 +6,30 @@
 # The graph is adaptive based on the first line of the input.
 
 cat - > /tmp/last_chart_data
-FIRST_LINE="$(head -n 1 /tmp/last_chart_data)"
+firstLine="$(head -n 1 /tmp/last_chart_data)"
+colCount="$(awk '{print NF; exit}' <<< "$firstLine")"
 
-SCRIPT='
-set term png size 1200,300;
-set nokey;
-set border lc rgbcolor "#888888";
-set autoscale noextend;
+scriptLines=(
+  'set term png size 1200,300;'
+  'set key left;'
+  'set border lc rgbcolor "#888888";'
+  'set autoscale noextend;'
+)
 
-'
-
-COL_COUNT="$(echo "$FIRST_LINE" | awk '{print NF; exit}')"
-
-if [[ "$COL_COUNT" -eq "1" ]]; then
-	SCRIPT="${SCRIPT}"'plot "/tmp/last_chart_data" using ($0):1 with lines;'
+if [[ "$colCount" -eq 1 ]]; then
+  scriptLines+=("plot \"/tmp/last_chart_data\" using (\$0):1 with lines")
 else
-	if [[ "$FIRST_LINE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2} ]]; then
-  	SCRIPT="${SCRIPT}"'
-set xdata time;
-set timefmt "%Y-%m-%dT%H:%M:%SZ";
-'
-	fi
+  if [[ "$firstLine" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2} ]]; then
+    scriptLines+=('set xdata time;')
+    scriptLines+=('set timefmt "%Y-%m-%dT%H:%M:%SZ";')
+  fi
 
-  SCRIPT="${SCRIPT}"'plot "/tmp/last_chart_data" using 1:2 with lines'
-  for (( c=3; c<=$COL_COUNT; c++ ))
+  plotParts=("plot \"/tmp/last_chart_data\" using 1:2 with lines title \"${1:-data}\"")
+  for (( c=2; c<$colCount; c++ ))
   do
-  	SCRIPT="$SCRIPT"', "" using'" 1:${c} with linespoints"
+    plotParts=(" \"\" using 1:$((c+1)) with linespoints "${argv[$c]:-data $c})
   done
+  scriptLines+=("${(pj:,:)plotParts}")
 fi
 
-OUTPUT="$(gnuplot -e "$SCRIPT" | base64)"
-
-printf "\033]1337;File=inline=1:%s\a\n" "$OUTPUT"
+printf "\033]1337;File=inline=1:$(gnuplot -e "${(F)scriptLines}" | base64)\a\n"
