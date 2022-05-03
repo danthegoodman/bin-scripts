@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
 isNewBranch() {
   ! git rev-parse --abbrev-ref --symbolic-full-name @{u} &>/dev/null
@@ -9,8 +9,8 @@ if isNewBranch; then
 fi
 
 commitCounts=( $(git rev-list --left-right --count @{upstream}...@) )
-remoteCount="${commitCounts[0]}"
-localCount="${commitCounts[1]}"
+remoteCount="${commitCounts[1]}"
+localCount="${commitCounts[2]}"
 
 if [[ "$localCount" -eq 0 ]]; then
   echo "There's nothing to push."
