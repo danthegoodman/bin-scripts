@@ -1,13 +1,29 @@
 #!/bin/zsh
 
-cd "$OS_REPO_HOME"
-doFind(){
-  find "website/app" -type f -name '*.js' -o -name '*.jsx' \
-   | grep -v -e 'tests' -e '\.raw\.' \
-   | sort \
-   | xargs wc -l
+cd "$OS_REPO_HOME/lang-js/apps/website/"
+
+find_relevant_files() {
+  find "app" -type f -name '*.js' -o -name '*.jsx' -o -name '*.d.ts'
 }
 
-output="$(doFind)"
-echo "$output"
+ignore_test_files() {
+  grep -v -e 'tests' -e '\.raw\.' \
+}
 
+ignore_js_files_with_dts_siblings() {
+  gsed -E '/\.d\.ts/ {
+     N
+     /(.+)\.d\.ts\n\1\.js/ d
+     /\.d\.ts/ D
+   }'
+}
+
+foundFiles="$(
+  find_relevant_files \
+   | ignore_test_files \
+   | sort \
+   | ignore_js_files_with_dts_siblings
+)"
+
+echo "$foundFiles" | xargs wc -l
+wc -l <(echo "$foundFiles") | sed 's/[^ ][^ ]*/files/2'
