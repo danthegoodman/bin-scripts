@@ -1,0 +1,66 @@
+#!/bin/zsh
+
+print_help(){
+  echo "git sw [option]"
+  echo
+  echo "switch branches with fzf. Defaults to listing local branches."
+  echo
+  echo "-h   Print this help"
+  echo "-r   List remote branches"
+}
+refs=()
+
+if [[ "$#" -gt 1 ]]; then
+  echo "Too many options"
+  echo
+  print_help
+  exit 1
+elif [[ "$1" = '-h' ]]; then
+  print_help
+  exit 1
+elif [[ -z "$1" ]]; then
+  refs=('refs/heads')
+elif [[ "$1" = '-r' ]]; then
+  refs=('refs/remotes')
+else
+  echo "Unknown option"
+  echo
+  print_help
+  exit 1
+fi
+
+if ! git rev-parse --is-inside-work-tree &> /dev/null; then
+  exit 1
+fi
+
+fmtAlign(){ print -n "%(align:$1)$2%(end)";}
+fmtIf(){ print -n "%(if)$1%(then)$2%(else)$3%(end)"; }
+fmtIfEquals(){ print -n "%(if:equals=$1)$2%(then)$3%(else)$4%(end)"; }
+
+rName="$(fmtIfEquals refs/remotes '%(refname:rstrip=-2)' '%(refname:lstrip=3)' '%(refname:lstrip=2)')"
+rRemoteState='%(upstream:trackshort)'
+rLastCommitDate='%(committerdate:short-local)'
+rRemoteDistance='%(upstream:track)'
+
+greenIfCurrent="$(fmtIf '%(HEAD)' '%(color:green)' '')"
+
+
+parts=(
+  "$greenIfCurrent"      "$(fmtAlign 60 "$rName")"
+  '%(color:yellow)'      "$(fmtAlign 2  "$rRemoteState")"
+  '%(color:brightblack)' "$(fmtAlign 11 "$rLastCommitDate")"
+  '%(color:brightred)'                  "$rRemoteDistance"
+)
+
+select_branch() {
+  git for-each-ref --sort='-committerdate' --color --format="${(j::)parts}" "${refs[@]}" \
+  | fzf --info=hidden --ansi --no-sort --nth 1 \
+  | awk '{print $1}'
+}
+
+selection="$(select_branch)"
+if [[ -n "$selection" ]]; then
+  git switch "$selection"
+else
+  exit 1
+fi
