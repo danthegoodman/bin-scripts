@@ -19,7 +19,7 @@ fi
 
 if [[ "$remoteCount" -ne 0 ]]; then
   echo "Pushing with --force-with-lease"
-  git push --force-with-lease
+  git push --force-with-lease --force-if-includes
 else
   git push
 fi
